@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import re
 from .models import BWVEntry, ChoralEntry
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, make_response, request
 from flask_cors import cross_origin
 from .models import db
 
@@ -34,7 +34,7 @@ bwv_service = Blueprint('bwv', __name__, url_prefix='/bwv-service')
 def status():
     be = BWVEntry.query.filter_by(titel='Allein zu dir, Herr Jesu Christ').first()
     print(be)
-    return be.getJson()
+    return make_response(be.getJson(), 200)
     #make_response("<!DOCTYPE html><head></head><body>Service is running!</body></html>", 200)
 
 @bwv_service.route('/chorales', methods=['GET', 'POST'])
@@ -61,15 +61,15 @@ def queryBWVChorales():
         res = db.session.query(ChoralEntry).filter(ChoralEntry.bwv.like(bwv)).first()
         print(res)
         if res:
-            return jsonify({'status:': 'Ok',
+            return make_response(jsonify({'status:': 'Ok',
                             'results': 1,
                             'data': [res.getEntry()]
-                            })
+                            }), 200)
         else:
-            return jsonify({'status:': 'Ok',
+            return make_response(jsonify({'status:': 'Ok',
                             'results': 0,
                             'data': []
-                            })
+                            }), 200)
         '''dbCon = sqlite3.connect('bwv.sqlite')
         wildcard = ''
         if bwv:
@@ -123,11 +123,11 @@ def queryBWVWorks():
         #be = BWVEntry.query.filter(BWVEntry.bwv.like(bwv)).first()
         if res != []:
             #be = res[0]
-            return jsonify({'status': 'Index out of range',
+            return make_response(jsonify({'status': 'Index out of range',
                             'results': len(res),
-                            'data': [entry.getEntry() for entry in res]})
+                            'data': [entry.getEntry() for entry in res]}), 200)
         else:
-            return jsonify({'status': 'Index out of range',
+            return make_response(jsonify({'status': 'Index out of range',
                             'results': 0,
                             'data': []
-                            })
+                            }), 200)
